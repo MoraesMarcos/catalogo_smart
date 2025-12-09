@@ -1,11 +1,10 @@
-package com.example.app_catalogo_produto.data.repository
+package com.example.myapplication.data.repository
 
 import android.content.Context
 import android.util.Log
 import com.example.app_catalogo_produto.data.local.AppDatabase
-import com.example.app_catalogo_produto.data.local.entity.toDomain
 import com.example.app_catalogo_produto.data.local.entity.toEntity
-import com.example.app_catalogo_produto.data.remote.ApiClient
+import com.example.myapplication.data.remote.ApiClient
 import com.example.app_catalogo_produto.data.remote.mapper.toDomain
 import com.example.app_catalogo_produto.domain.model.Product
 import com.example.app_catalogo_produto.domain.repository.ProductRepository

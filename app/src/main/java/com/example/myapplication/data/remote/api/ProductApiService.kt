@@ -1,6 +1,6 @@
-package com.example.app_catalogo_produto.data.remote.api
+package com.example.myapplication.data.remote.api
 
-import com.example.app_catalogo_produto.data.remote.dto.ProductDto
+import com.example.myapplication.data.remote.dto.ProductDto
 import retrofit2.http.GET
 import retrofit2.http.Path
 

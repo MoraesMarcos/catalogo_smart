@@ -1,6 +1,6 @@
-package com.example.app_catalogo_produto.data.remote
+package com.example.myapplication.data.remote
 
-import com.example.app_catalogo_produto.data.remote.api.ProductApiService
+import com.example.myapplication.data.remote.api.ProductApiService
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit

@@ -1,4 +1,4 @@
-package com.example.app_catalogo_produto.data.remote.dto
+package com.example.myapplication.data.remote.dto
 
 data class ProductDto(
     val id: Int,
