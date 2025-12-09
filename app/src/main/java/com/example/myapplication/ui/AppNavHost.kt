@@ -12,15 +12,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.myapplication.data.repository.ProductRepositoryImpl
 import com.example.myapplication.ui.category.CategoryProductsScreen
 import com.example.myapplication.ui.category.CategoryScreen
 import com.example.myapplication.ui.favorites.FavoriteScreen
 import com.example.myapplication.ui.product.ProductDetailScreen
 import com.example.myapplication.ui.product.ProductDetailViewModel
+import com.example.myapplication.ui.product.ProductDetailViewModelFactory
 import com.example.myapplication.ui.product.ProductListScreen
 import com.example.myapplication.ui.product.ProductViewModel
 import com.example.myapplication.ui.shimmer.ShimmerListScreen
-import com.example.myapplication.ui.state.ProductUiState
 import com.example.myapplication.ui.welcome.WelcomeScreen
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -31,6 +32,7 @@ fun AppNavHost() {
 
     val navController = rememberNavController()
     val context = LocalContext.current
+
     val viewModel: ProductViewModel = viewModel()
 
     NavHost(
@@ -59,7 +61,7 @@ fun AppNavHost() {
                 onOpenCategories = { navController.navigate("categories") },
                 onLogout = {
                     navController.navigate("welcome") {
-                        popUpTo(0) { inclusive = true }
+                        popUpTo(navController.graph.startDestinationId) { inclusive = true }
                     }
                 }
             )
@@ -71,11 +73,15 @@ fun AppNavHost() {
         ) { entry ->
 
             val id = entry.arguments?.getInt("productId") ?: 0
-            val detailVM: ProductDetailViewModel = viewModel()
-            val uiState by viewModel.uiState.collectAsState()
-            LaunchedEffect(uiState) {
-                val products = (uiState as? ProductUiState.Success)?.products ?: emptyList()
-                detailVM.setProducts(products)
+
+            val repository = ProductRepositoryImpl(context)
+
+            val detailVM: ProductDetailViewModel = viewModel(
+                factory = ProductDetailViewModelFactory(repository)
+            )
+
+            LaunchedEffect(id) {
+                detailVM.loadProduct(id)
             }
 
             ProductDetailScreen(
@@ -86,8 +92,7 @@ fun AppNavHost() {
         }
 
         composable("favorites") {
-
-            val favoriteIds by viewModel.favoriteIds.collectAsState()
+            val favoriteIds by viewModel.favoriteIds.collectAsState(initial = emptySet())
 
             FavoriteScreen(
                 favorites = viewModel.getFavoriteProducts(),
@@ -99,7 +104,6 @@ fun AppNavHost() {
         }
 
         composable("categories") {
-
             CategoryScreen(
                 categories = viewModel.getCategories(),
                 onBackClick = { navController.popBackStack() },
@@ -121,15 +125,13 @@ fun AppNavHost() {
             val encoded = entry.arguments?.getString("category") ?: ""
             val category = URLDecoder.decode(encoded, StandardCharsets.UTF_8.toString())
 
-            val favoriteIds by viewModel.favoriteIds.collectAsState()
+            val favoriteIds by viewModel.favoriteIds.collectAsState(initial = emptySet())
             val products = viewModel.getProductsByCategory(category)
 
             if (products.isEmpty()) {
-                Toast.makeText(
-                    context,
-                    "Nenhum produto encontrado para $category",
-                    Toast.LENGTH_SHORT
-                ).show()
+                LaunchedEffect(Unit) {
+                    Toast.makeText(context, "Nenhum produto encontrado para $category", Toast.LENGTH_SHORT).show()
+                }
             }
 
             CategoryProductsScreen(

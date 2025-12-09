@@ -1,13 +1,21 @@
 package com.example.myapplication.ui.product
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlowimport kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.StateFlow
 import kotlin.collections.distinct
 import kotlin.collections.filter
-import kotlin.collections.isNotEmpty
 import kotlin.collections.mapNotNull
 import kotlin.collections.sorted
 import kotlin.collections.toMutableSet
+import com.example.myapplication.domain.model.Product
+import com.example.myapplication.data.repository.ProductRepositoryImpl
+import com.example.myapplication.domain.repository.ProductRepository
+import com.example.myapplication.domain.util.RemoteResult
+import com.example.myapplication.ui.state.ProductUiState
 
 class ProductViewModel(
     application: Application
