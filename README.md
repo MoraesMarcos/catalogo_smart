@@ -46,8 +46,6 @@ O **Catálogo Smart** é um aplicativo Android moderno que resolve esses problem
 
 O projeto foi desenvolvido seguindo os princípios de **Clean Architecture** e **MVVM**, garantindo um código desacoplado, testável e escalável.
 
-
-
 ### 🎨 Frontend / UI
 * **Jetpack Compose:** UI declarativa moderna.
 * **Material Design 3:** Padrões de design mais recentes do Google.
@@ -68,6 +66,23 @@ O projeto foi desenvolvido seguindo os princípios de **Clean Architecture** e *
 
 ---
 
+## 📂 Organização e Metodologia
+
+Para garantir a organização e a qualidade do desenvolvimento em equipe, foram adotadas as seguintes práticas:
+
+### 📁 Estrutura de Pastas
+O projeto segue uma hierarquia clara de pacotes, separando responsabilidades:
+* **`app/`**: Configurações gerais da aplicação.
+* **`data/`**: Camada de dados (Implementação da API, Banco de Dados Room, DTOs e Mappers).
+* **`domain/`**: Camada de domínio (Modelos de dados e Interfaces dos Repositórios).
+* **`ui/`**: Camada de apresentação (Telas/Screens, ViewModels, Estados e Componentes Visuais).
+
+### 🤝 Fluxo de Trabalho (Git Flow)
+* **Branches por Feature:** O desenvolvimento foi segmentado utilizando branches específicas para cada nova funcionalidade (ex: `feat-api`, `feat-room`, `feat-ui-ux`).
+* **Code Review:** A integração de código na branch principal (`main`) foi realizada através de **Pull Requests**, revisados pelos membros da equipe para garantir a qualidade e consistência do código.
+
+---
+
 ## ⚙️ Instruções de Instalação e Execução
 
 ### 🔧 1. Pré-requisitos
@@ -78,7 +93,7 @@ Certifique-se de ter instalado:
 
 ### ▶️ 2. Clonar o repositório
 
-git clone https://github.com/MoraesMarcos/catalogo_smart
+git clone [https://github.com/MoraesMarcos/catalogo_smart](https://github.com/MoraesMarcos/catalogo_smart)
 
 ### 📦 3. Abrir no Android Studio
 1. Abra o **Android Studio**.
