@@ -78,8 +78,10 @@ O projeto segue uma hierarquia clara de pacotes, separando responsabilidades:
 * **`ui/`**: Camada de apresentação (Telas/Screens, ViewModels, Estados e Componentes Visuais).
 
 ### 🤝 Fluxo de Trabalho (Git Flow)
-* **Branches por Feature:** O desenvolvimento foi segmentado utilizando branches específicas para cada nova funcionalidade (ex: `feat-api`, `feat-room`, `feat-ui-ux`).
-* **Code Review:** A integração de código na branch principal (`main`) foi realizada através de **Pull Requests**, revisados pelos membros da equipe para garantir a qualidade e consistência do código.
+* **Branches por Feature:** O desenvolvimento foi segmentado utilizando branches específicas para cada nova funcionalidade (ex: `feat-api`, `feat-room`, `feat-ui-ux` e `feat-mvvm`).
+* **Branch `dev` (Integração):** Todas as branches de feature são finalizadas e mergeadas na branch `dev` para testes integrados.
+* **Branch `main` (Produção):** Contém apenas o código estável. Atualizações ocorrem através de merges vindos da `dev` após validação.
+* **Code Review:** A integração de código foi realizada através de **Pull Requests**, revisados pelos membros da equipe.
 
 ---
 
@@ -110,10 +112,11 @@ git clone [https://github.com/MoraesMarcos/catalogo_smart](https://github.com/Mo
 
 ## 📸 Prints do Aplicativo
 <div style="display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 10px;">
-  <img src="docs/boas_vindas.png" alt="Tela de Boas-vindas" width="200"/>
-  <img src="docs/lista_produtos.png" alt="Lista de Produtos" width="200"/>
-  <img src="docs/detalhes.png" alt="Detalhes do Produto" width="200"/>
-  <img src="docs/favoritos.png" alt="Tela de Favoritos" width="200"/>
+  <img src="https://github.com/user-attachments/assets/ef79ecec-deca-49d1-ac02-6c30d96156ff" alt="Tela de Início" width="170"/>
+  <img src="https://github.com/user-attachments/assets/82b6d6a4-4f9e-4e79-8468-f613a44d310c" alt="Tela Principal" width="170"/>
+  <img src="https://github.com/user-attachments/assets/b8a4a848-74e7-406d-83d4-dc787e93b41b" alt="Detalhes do Produto" width="170"/>
+  <img src="https://github.com/user-attachments/assets/3cca4404-51f8-4be6-8350-ac4cbe1204eb" alt="Tela de Favoritos" width="170"/>
+  <img src="https://github.com/user-attachments/assets/01d53b04-780b-4464-bde2-0075687f0070" alt="Tela de Categorias" width="170"/>
 </div>
 
 ---
