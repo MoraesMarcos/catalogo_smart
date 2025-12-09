@@ -2,13 +2,13 @@ package com.example.myapplication.data.repository
 
 import android.content.Context
 import android.util.Log
-import com.example.app_catalogo_produto.data.local.AppDatabase
-import com.example.app_catalogo_produto.data.local.entity.toEntity
+import com.example.myapplication.data.local.AppDatabase
+import com.example.myapplication.data.local.entity.toEntity
 import com.example.myapplication.data.remote.ApiClient
-import com.example.app_catalogo_produto.data.remote.mapper.toDomain
-import com.example.app_catalogo_produto.domain.model.Product
-import com.example.app_catalogo_produto.domain.repository.ProductRepository
-import com.example.app_catalogo_produto.domain.util.RemoteResult
+import com.example.myapplication.data.remote.mapper.toDomain
+import com.example.myapplication.domain.model.Product
+import com.example.myapplication.domain.repository.ProductRepository
+import com.example.myapplication.domain.util.RemoteResult
 import retrofit2.HttpException
 import java.io.IOException
 

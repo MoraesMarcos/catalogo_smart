@@ -2,7 +2,7 @@ package com.example.myapplication.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.app_catalogo_produto.domain.model.Product
+import com.example.myapplication.domain.model.Product
 
 @Entity(tableName = "products")
 data class ProductEntity(

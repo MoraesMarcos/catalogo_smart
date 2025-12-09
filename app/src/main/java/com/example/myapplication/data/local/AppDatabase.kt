@@ -4,8 +4,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.app_catalogo_produto.data.local.dao.ProductDao
-import com.example.app_catalogo_produto.data.local.entity.ProductEntity
+import com.example.myapplication.data.local.dao.ProductDao
+import com.example.myapplication.data.local.entity.ProductEntity
 
 @Database(
     entities = [ProductEntity::class],

@@ -1,7 +1,7 @@
-package com.example.app_catalogo_produto.data.remote.mapper
+package com.example.myapplication.data.remote.mapper
 
 import com.example.myapplication.data.remote.dto.ProductDto
-import com.example.app_catalogo_produto.domain.model.Product
+import com.example.myapplication.domain.model.Product
 
 fun ProductDto.toDomain() = Product(
     id = id,
