@@ -21,7 +21,7 @@ import com.example.app_catalogo_produto.ui.product.ProductListScreen
 import com.example.app_catalogo_produto.ui.product.ProductViewModel
 import com.example.app_catalogo_produto.ui.shimmer.ShimmerListScreen
 import com.example.app_catalogo_produto.ui.state.ProductUiState
-import com.example.app_catalogo_produto.ui.welcome.WelcomeScreen
+import com.example.myapplication.ui.welcome.WelcomeScreen
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
