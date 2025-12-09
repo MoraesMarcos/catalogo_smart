@@ -121,6 +121,13 @@ git clone [https://github.com/MoraesMarcos/catalogo_smart](https://github.com/Mo
 
 ---
 
+## 📲 Download
+Quer testar o aplicativo no seu dispositivo? Baixe o APK da versão mais recente:
+
+<a href="https://drive.google.com/drive/folders/1WgtWAMns2ZapqUmW03YjMaoaNwOAl8Gh?usp=sharing">
+  <img src="https://img.shields.io/badge/Download-APK%20v1.0-blue?style=for-the-badge&logo=google-drive&logoColor=white" alt="Download APK" />
+</a>
+
 ## 🎉 Conclusão
 O **Catálogo Smart** atende 100% dos requisitos técnicos propostos, oferecendo uma experiência de navegação fluida e resiliente (Online/Offline). O código está limpo, modular e pronto para futuras expansões, como:
 
