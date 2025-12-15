@@ -10,6 +10,7 @@ import com.example.myapplication.data.remote.mapper.toDomain
 import com.example.myapplication.domain.model.Product
 import com.example.myapplication.domain.repository.ProductRepository
 import com.example.myapplication.domain.util.RemoteResult
+import kotlinx.coroutines.delay
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -21,43 +22,60 @@ class ProductRepositoryImpl(
     private val dao = AppDatabase.getInstance(context).productDao()
 
     override suspend fun getProducts(): RemoteResult<List<Product>> {
-        return try {
-
-            val dtoList = api.getProducts()
-            val products = dtoList.map { it.toDomain() }
-
-            try {
+        return fetchAndSave(
+            networkCall = { api.getProducts().map { it.toDomain() } },
+            saveToLocal = { products ->
                 dao.clearAll()
                 dao.insertAll(products.map { it.toEntity() })
-            } catch (e: Exception) {
-                Log.e("Repository", "Erro ao salvar cache local", e)
-            }
-
-            RemoteResult.Success(products)
-
-        } catch (e: Exception) {
-            try {
-                val localData = dao.getAll()
-                if (localData.isNotEmpty()) {
-                    RemoteResult.Success(localData.map { it.toDomain() })
-                } else {
-                    handleException(e)
-                }
-            } catch (dbError: Exception) {
-                handleException(e)
-            }
-        }
+            },
+            fetchFromLocal = { dao.getAll().map { it.toDomain() } }
+        )
     }
 
     override suspend fun getProductById(id: Int): RemoteResult<Product> {
+
+        val localProduct = dao.getById(id)?.toDomain()
+
+        if (localProduct != null) {
+            return RemoteResult.Success(localProduct)
+        }
+
         return try {
-            val dto = api.getProductById(id)
-            RemoteResult.Success(dto.toDomain())
+            val remoteProduct = api.getProductById(id).toDomain()
+            RemoteResult.Success(remoteProduct)
         } catch (e: Exception) {
+            handleException(e)
+        }
+    }
+
+    private suspend fun <T> fetchAndSave(
+        networkCall: suspend () -> T,
+        saveToLocal: suspend (T) -> Unit,
+        fetchFromLocal: suspend () -> T
+    ): RemoteResult<T> {
+        return try {
+            val data = networkCall()
+
             try {
-                val local = dao.getById(id)
-                if (local != null) {
-                    RemoteResult.Success(local.toDomain())
+                saveToLocal(data)
+            } catch (e: Exception) {
+                Log.e("Repository", "Falha ao salvar cache", e)
+            }
+
+            RemoteResult.Success(data)
+
+        } catch (e: Exception) {
+
+            try {
+
+                delay(800)
+
+                val localData = fetchFromLocal()
+
+                if (localData is List<*> && localData.isNotEmpty()) {
+                    RemoteResult.Success(localData)
+                } else if (localData != null && localData !is List<*>) {
+                    RemoteResult.Success(localData)
                 } else {
                     handleException(e)
                 }
@@ -69,9 +87,9 @@ class ProductRepositoryImpl(
 
     private fun <T> handleException(e: Exception): RemoteResult<T> {
         val message = when (e) {
-            is IOException -> "Sem internet. Não foi possível carregar os dados."
-            is HttpException -> "Erro ${e.code()}. Tente novamente."
-            else -> "Erro inesperado. Tente novamente."
+            is IOException -> "Sem conexão com a internet. Verifique seu Wifi/Dados."
+            is HttpException -> "Erro no servidor (Código: ${e.code()})."
+            else -> "Ocorreu um erro inesperado."
         }
         return RemoteResult.Error(message, e)
     }

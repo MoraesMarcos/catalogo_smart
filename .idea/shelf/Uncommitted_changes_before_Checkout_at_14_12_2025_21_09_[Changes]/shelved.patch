@@ -1,0 +1,151 @@
+Index: app/src/main/java/com/example/myapplication/data/repository/ProductRepositoryImpl.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.app_catalogo_produto.data.repository\r\n\r\nimport android.content.Context\r\nimport android.util.Log\r\nimport com.example.app_catalogo_produto.data.local.AppDatabase\r\nimport com.example.app_catalogo_produto.data.local.entity.toDomain\r\nimport com.example.app_catalogo_produto.data.local.entity.toEntity\r\nimport com.example.app_catalogo_produto.data.remote.ApiClient\r\nimport com.example.app_catalogo_produto.data.remote.mapper.toDomain\r\nimport com.example.app_catalogo_produto.domain.model.Product\r\nimport com.example.app_catalogo_produto.domain.repository.ProductRepository\r\nimport com.example.app_catalogo_produto.domain.util.RemoteResult\r\nimport retrofit2.HttpException\r\nimport java.io.IOException\r\n\r\nclass ProductRepositoryImpl(\r\n    context: Context\r\n) : ProductRepository {\r\n\r\n    private val api = ApiClient.productApi\r\n    private val dao = AppDatabase.getInstance(context).productDao()\r\n\r\n    override suspend fun getProducts(): RemoteResult<List<Product>> {\r\n        return try {\r\n\r\n            val dtoList = api.getProducts()\r\n            val products = dtoList.map { it.toDomain() }\r\n\r\n            try {\r\n                dao.clearAll()\r\n                dao.insertAll(products.map { it.toEntity() })\r\n            } catch (e: Exception) {\r\n                Log.e(\"Repository\", \"Erro ao salvar cache local\", e)\r\n            }\r\n\r\n            RemoteResult.Success(products)\r\n\r\n        } catch (e: Exception) {\r\n            try {\r\n                val localData = dao.getAll()\r\n                if (localData.isNotEmpty()) {\r\n                    RemoteResult.Success(localData.map { it.toDomain() })\r\n                } else {\r\n                    handleException(e)\r\n                }\r\n            } catch (dbError: Exception) {\r\n                handleException(e)\r\n            }\r\n        }\r\n    }\r\n\r\n    override suspend fun getProductById(id: Int): RemoteResult<Product> {\r\n        return try {\r\n            val dto = api.getProductById(id)\r\n            RemoteResult.Success(dto.toDomain())\r\n        } catch (e: Exception) {\r\n            try {\r\n                val local = dao.getById(id)\r\n                if (local != null) {\r\n                    RemoteResult.Success(local.toDomain())\r\n                } else {\r\n                    handleException(e)\r\n                }\r\n            } catch (dbError: Exception) {\r\n                handleException(e)\r\n            }\r\n        }\r\n    }\r\n\r\n    private fun <T> handleException(e: Exception): RemoteResult<T> {\r\n        val message = when (e) {\r\n            is IOException -> \"Sem internet. Não foi possível carregar os dados.\"\r\n            is HttpException -> \"Erro ${e.code()}. Tente novamente.\"\r\n            else -> \"Erro inesperado. Tente novamente.\"\r\n        }\r\n        return RemoteResult.Error(message, e)\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/example/myapplication/data/repository/ProductRepositoryImpl.kt b/app/src/main/java/com/example/myapplication/data/repository/ProductRepositoryImpl.kt
+--- a/app/src/main/java/com/example/myapplication/data/repository/ProductRepositoryImpl.kt	(revision c130fc36a39aa9f6a60d4f470c90d3847010712b)
++++ b/app/src/main/java/com/example/myapplication/data/repository/ProductRepositoryImpl.kt	(date 1765757307316)
+@@ -1,15 +1,16 @@
+-package com.example.app_catalogo_produto.data.repository
++package com.example.myapplication.data.repository
+ 
+ import android.content.Context
+ import android.util.Log
+-import com.example.app_catalogo_produto.data.local.AppDatabase
+-import com.example.app_catalogo_produto.data.local.entity.toDomain
+-import com.example.app_catalogo_produto.data.local.entity.toEntity
+-import com.example.app_catalogo_produto.data.remote.ApiClient
+-import com.example.app_catalogo_produto.data.remote.mapper.toDomain
+-import com.example.app_catalogo_produto.domain.model.Product
+-import com.example.app_catalogo_produto.domain.repository.ProductRepository
+-import com.example.app_catalogo_produto.domain.util.RemoteResult
++import com.example.myapplication.data.local.AppDatabase
++import com.example.myapplication.data.local.entity.toDomain
++import com.example.myapplication.data.local.entity.toEntity
++import com.example.myapplication.data.remote.ApiClient
++import com.example.myapplication.data.remote.mapper.toDomain
++import com.example.myapplication.domain.model.Product
++import com.example.myapplication.domain.repository.ProductRepository
++import com.example.myapplication.domain.util.RemoteResult
++import kotlinx.coroutines.delay
+ import retrofit2.HttpException
+ import java.io.IOException
+ 
+@@ -21,57 +22,81 @@
+     private val dao = AppDatabase.getInstance(context).productDao()
+ 
+     override suspend fun getProducts(): RemoteResult<List<Product>> {
+-        return try {
+-
+-            val dtoList = api.getProducts()
+-            val products = dtoList.map { it.toDomain() }
+-
+-            try {
++        return fetchAndSave(
++            networkCall = { api.getProducts().map { it.toDomain() } },
++            saveToLocal = { products ->
+                 dao.clearAll()
+                 dao.insertAll(products.map { it.toEntity() })
+-            } catch (e: Exception) {
+-                Log.e("Repository", "Erro ao salvar cache local", e)
+-            }
+-
+-            RemoteResult.Success(products)
+-
++            },
++            fetchFromLocal = { dao.getAll().map { it.toDomain() } }
++        )
++    }
++
++    override suspend fun getProductById(id: Int): RemoteResult<Product> {
++        // Estratégia: Tenta local primeiro para detalhe (mais rápido), senão busca remoto
++        // Se quiser forçar sempre atualização, inverta a lógica (igual ao getProducts)
++        val localProduct = dao.getById(id)?.toDomain()
++
++        if (localProduct != null) {
++            return RemoteResult.Success(localProduct)
++        }
++
++        return try {
++            val remoteProduct = api.getProductById(id).toDomain()
++            RemoteResult.Success(remoteProduct)
+         } catch (e: Exception) {
+-            try {
+-                val localData = dao.getAll()
+-                if (localData.isNotEmpty()) {
+-                    RemoteResult.Success(localData.map { it.toDomain() })
+-                } else {
+-                    handleException(e)
+-                }
+-            } catch (dbError: Exception) {
+-                handleException(e)
+-            }
++            handleException(e)
+         }
+     }
+ 
+-    override suspend fun getProductById(id: Int): RemoteResult<Product> {
++    // --- FUNÇÃO AUXILIAR GENÉRICA (O Segredo da Limpeza) ---
++    private suspend fun <T> fetchAndSave(
++        networkCall: suspend () -> T,
++        saveToLocal: suspend (T) -> Unit,
++        fetchFromLocal: suspend () -> T
++    ): RemoteResult<T> {
+         return try {
+-            val dto = api.getProductById(id)
+-            RemoteResult.Success(dto.toDomain())
++            // 1. Tenta Rede
++            val data = networkCall()
++
++            // 2. Salva Cache (Try/Catch interno para não quebrar se o banco falhar)
++            try {
++                saveToLocal(data)
++            } catch (e: Exception) {
++                Log.e("Repository", "Falha ao salvar cache", e)
++            }
++
++            // 3. Sucesso Online
++            RemoteResult.Success(data)
++
+         } catch (e: Exception) {
++            // 4. Falha de Rede -> Fallback para Local
+             try {
+-                val local = dao.getById(id)
+-                if (local != null) {
+-                    RemoteResult.Success(local.toDomain())
++                // *** AQUI ESTÁ O PEDIDO DO PROFESSOR (TIMER) ***
++                // Simula um delay para o usuário ver o Shimmer e não "piscar" a tela
++                delay(800)
++
++                val localData = fetchFromLocal()
++
++                // Verifica se é uma lista e se não está vazia
++                if (localData is List<*> && localData.isNotEmpty()) {
++                    RemoteResult.Success(localData)
++                } else if (localData != null && localData !is List<*>) {
++                    RemoteResult.Success(localData)
+                 } else {
+-                    handleException(e)
++                    handleException(e) // Banco vazio + Sem net = Erro
+                 }
+             } catch (dbError: Exception) {
+-                handleException(e)
++                handleException(e) // Erro fatal
+             }
+         }
+     }
+ 
+     private fun <T> handleException(e: Exception): RemoteResult<T> {
+         val message = when (e) {
+-            is IOException -> "Sem internet. Não foi possível carregar os dados."
+-            is HttpException -> "Erro ${e.code()}. Tente novamente."
+-            else -> "Erro inesperado. Tente novamente."
++            is IOException -> "Sem conexão com a internet. Verifique seu Wifi/Dados."
++            is HttpException -> "Erro no servidor (Código: ${e.code()})."
++            else -> "Ocorreu um erro inesperado."
+         }
+         return RemoteResult.Error(message, e)
+     }

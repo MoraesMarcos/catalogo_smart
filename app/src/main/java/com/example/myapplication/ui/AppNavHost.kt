@@ -21,7 +21,7 @@ import com.example.myapplication.ui.product.ProductDetailViewModel
 import com.example.myapplication.ui.product.ProductDetailViewModelFactory
 import com.example.myapplication.ui.product.ProductListScreen
 import com.example.myapplication.ui.product.ProductViewModel
-import com.example.myapplication.ui.shimmer.ShimmerListScreen
+import com.example.myapplication.ui.shimmer.ShimmerProductListPlaceholder
 import com.example.myapplication.ui.welcome.WelcomeScreen
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -145,7 +145,7 @@ fun AppNavHost() {
         }
 
         composable("loading") {
-            ShimmerListScreen()
+            ShimmerProductListPlaceholder()
         }
     }
 }
