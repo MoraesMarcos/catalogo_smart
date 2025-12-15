@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "73571256008",
+    "project_id": "catalogosmart-ads",
+    "storage_bucket": "catalogosmart-ads.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:73571256008:android:c9c2cf8ae2d941ecc747fd",
+        "android_client_info": {
+          "package_name": "com.example.myapplication"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdk28b1_Cm-kKwA9TbY7rfbitAjznY6PA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
