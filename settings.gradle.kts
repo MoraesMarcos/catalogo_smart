@@ -19,7 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "My Application"
+rootProject.name = "catalogo_smart"
 include(":app")
-include(":app")
- 
