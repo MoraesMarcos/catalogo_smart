@@ -7,37 +7,23 @@ import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.random.Random
 
-data class CartItem(
-    val product: Product,
-    var quantity: Int
-)
-
-data class Order(
-    val id: String,
-    val items: List<CartItem>,
-    val total: Double,
-    val date: String,
-    val status: String,
-    val deliveryEstimate: String
-)
-
-data class AppNotification(
-    val id: Long = System.currentTimeMillis(),
-    val title: String,
-    val message: String,
-    val type: NotificationType
-)
-
+data class CartItem(val product: Product, var quantity: Int)
+data class Order(val id: String, val items: List<CartItem>, val total: Double, val date: String, val status: String, val deliveryEstimate: String)
+data class AppNotification(val id: Long = System.currentTimeMillis(), val title: String, val message: String, val type: NotificationType)
 enum class NotificationType { SUCCESS, PENDING, CANCELLED, INFO }
 
 class UserViewModel : ViewModel() {
     private val auth = FirebaseAuth.getInstance()
+
+    private val _isLoggedIn = MutableStateFlow(false)
+    val isLoggedIn: StateFlow<Boolean> = _isLoggedIn.asStateFlow()
 
     private val _userName = MutableStateFlow("Visitante")
     val userName: StateFlow<String> = _userName
@@ -67,16 +53,17 @@ class UserViewModel : ViewModel() {
     fun refreshUserData() {
         val user = auth.currentUser
         if (user != null) {
+            _isLoggedIn.value = true
             val email = user.email ?: ""
             _userEmail.value = email
-
             val nameFromEmail = email.substringBefore("@")
                 .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
-
             _userName.value = nameFromEmail
         } else {
+            _isLoggedIn.value = false
             _userName.value = "Visitante"
             _userEmail.value = ""
+            _cartItems.value = emptyList()
         }
     }
 
@@ -90,6 +77,8 @@ class UserViewModel : ViewModel() {
     }
 
     fun addToCart(product: Product) {
+        if (!_isLoggedIn.value) return
+
         val currentCart = _cartItems.value.toMutableList()
         val existingItem = currentCart.find { it.product.id == product.id }
 
@@ -116,9 +105,10 @@ class UserViewModel : ViewModel() {
     }
 
     fun checkout() {
+        if (!_isLoggedIn.value) return
+
         val items = _cartItems.value
         val total = _totalPrice.value
-
         if (items.isEmpty()) return
 
         viewModelScope.launch {
@@ -143,13 +133,14 @@ class UserViewModel : ViewModel() {
             _orders.value = currentOrders
 
             addNotification("Compra Aprovada!", "Pedido $orderId confirmado!", NotificationType.SUCCESS)
-
             _cartItems.value = emptyList()
             calculateTotal()
         }
     }
 
     fun simulateDirectPurchase(product: Product) {
+        if (!_isLoggedIn.value) return
+
         viewModelScope.launch {
             addNotification("Processando", "Comprando ${product.name}...", NotificationType.PENDING)
             delay(2000)
@@ -183,7 +174,5 @@ class UserViewModel : ViewModel() {
     fun logout() {
         auth.signOut()
         refreshUserData()
-        _cartItems.value = emptyList()
-        _orders.value = emptyList()
     }
 }

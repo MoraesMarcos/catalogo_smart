@@ -41,18 +41,21 @@ fun AppNavHost() {
     val context = LocalContext.current
     val authRepository = remember { AuthRepositoryImpl() }
 
-    val startDestination = if (authRepository.isUserLoggedIn()) "main" else "welcome"
-
     val productViewModel: ProductViewModel = viewModel()
     val userViewModel: UserViewModel = viewModel()
 
     NavHost(
         navController = navController,
-        startDestination = startDestination
+        startDestination = "welcome"
     ) {
 
         composable("welcome") {
-            WelcomeScreen(onEnterClick = { navController.navigate("login") })
+            WelcomeScreen(
+                onEnterClick = {
+                    userViewModel.refreshUserData()
+                    navController.navigate("main")
+                }
+            )
         }
 
         composable("login") {
@@ -61,9 +64,8 @@ fun AppNavHost() {
                 viewModel = loginViewModel,
                 onLoginSuccess = {
                     userViewModel.refreshUserData()
-                    navController.navigate("main") {
-                        popUpTo("welcome") { inclusive = true }
-                    }
+                    navController.popBackStack()
+                    Toast.makeText(context, "Login realizado!", Toast.LENGTH_SHORT).show()
                 },
                 onNavigateToSignUp = { navController.navigate("signup") }
             )
@@ -88,6 +90,7 @@ fun AppNavHost() {
                 userViewModel = userViewModel,
                 onProductClick = { id -> navController.navigate("productDetail/$id") },
                 onNavigateToCategories = { navController.navigate("categories") },
+                onNavigateToLogin = { navController.navigate("login") },
                 onLogout = {
                     userViewModel.logout()
                     navController.navigate("welcome") {
@@ -141,6 +144,7 @@ fun AppNavHost() {
                 userViewModel = userViewModel,
                 isFavorite = isFav,
                 onToggleFavorite = { productViewModel.toggleFavorite(id) },
+                onNavigateToLogin = { navController.navigate("login") },
                 onBackClick = { navController.popBackStack() }
             )
         }

@@ -1,5 +1,6 @@
 package com.example.myapplication.ui.product
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -14,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,12 +31,24 @@ fun ProductDetailScreen(
     userViewModel: UserViewModel,
     isFavorite: Boolean,
     onToggleFavorite: () -> Unit,
+    onNavigateToLogin: () -> Unit,
     onBackClick: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val isLoggedIn by userViewModel.isLoggedIn.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(productId) {
         viewModel.loadProduct(productId)
+    }
+
+    fun checkAuth(action: () -> Unit) {
+        if (isLoggedIn) {
+            action()
+        } else {
+            Toast.makeText(context, "Faça login para continuar", Toast.LENGTH_SHORT).show()
+            onNavigateToLogin()
+        }
     }
 
     Scaffold(
@@ -48,7 +62,7 @@ fun ProductDetailScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = onToggleFavorite) {
+                    IconButton(onClick = { checkAuth { onToggleFavorite() } }) {
                         Icon(
                             imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                             contentDescription = "Favoritar",
@@ -119,7 +133,7 @@ fun ProductDetailScreen(
                             Text(text = "Sobre o produto:", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Descrição detalhada do produto. Este produto possui alta qualidade e garantia de satisfação.",
+                                text = "Descrição detalhada do produto...",
                                 style = MaterialTheme.typography.bodyLarge,
                                 lineHeight = 24.sp
                             )
@@ -131,7 +145,7 @@ fun ProductDetailScreen(
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 OutlinedButton(
-                                    onClick = { userViewModel.addToCart(product) },
+                                    onClick = { checkAuth { userViewModel.addToCart(product) } },
                                     modifier = Modifier.weight(1f).height(50.dp),
                                     shape = MaterialTheme.shapes.medium
                                 ) {
@@ -139,8 +153,7 @@ fun ProductDetailScreen(
                                 }
 
                                 Button(
-                                    // CORREÇÃO: Removido o .name para passar o objeto Product
-                                    onClick = { userViewModel.simulateDirectPurchase(product) },
+                                    onClick = { checkAuth { userViewModel.simulateDirectPurchase(product) } },
                                     modifier = Modifier.weight(1f).height(50.dp),
                                     shape = MaterialTheme.shapes.medium,
                                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)

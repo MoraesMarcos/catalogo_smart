@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,11 +24,13 @@ import kotlinx.coroutines.flow.StateFlow
 fun ProductListScreen(
     uiStateFlow: StateFlow<ProductUiState>,
     favoriteIdsFlow: StateFlow<Set<Int>>,
+    isLoggedIn: Boolean,
     onReload: () -> Unit,
     onProductClick: (Int) -> Unit,
     onToggleFavorite: (Int) -> Unit,
     onOpenFavorites: () -> Unit,
     onOpenCategories: () -> Unit,
+    onLoginClick: () -> Unit,
     onLogout: () -> Unit
 ) {
     val uiState by uiStateFlow.collectAsState()
@@ -35,20 +38,21 @@ fun ProductListScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-
         topBar = {
             TopAppBar(
                 title = { Text("Ofertas") },
                 modifier = Modifier.shadow(8.dp),
                 navigationIcon = {
-                    IconButton(onClick = onLogout) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ExitToApp,
-                            contentDescription = "Sair"
-                        )
+                    if (!isLoggedIn) {
+                        IconButton(onClick = onLoginClick) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Login,
+                                contentDescription = "Entrar"
+                            )
+                        }
+                    } else {
                     }
                 },
-
                 actions = {
                     IconButton(onClick = onOpenCategories) {
                         Icon(
